@@ -65,5 +65,30 @@ router.delete('/products/:id', async (req, res) => {
   }
 });
 
+// 좋아요 수 증가 API
+router.patch('/products/:id/like', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ error: 'Product not found' });
+
+    product.favoriteCount += 1; // 좋아요 수 1 증가
+    await product.save(); // 데이터베이스에 저장
+
+    res.status(200).json(product);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// 모든 상품의 좋아요 수를 0으로 초기화
+router.patch('/products/reset-likes', async (req, res) => {
+  try {
+    await Product.updateMany({}, { $set: { favoriteCount: 0 } }); // 모든 상품의 좋아요 수를 0으로 설정
+    res.status(200).json({ message: 'All likes reset to 0' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 module.exports = router;
 
